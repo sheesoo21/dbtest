@@ -26,7 +26,23 @@ module.exports = {
             await connection.release();
         }
         
+    },
+    selectowners : async function(){
+        const connection = await connect();
+        if(connection.error) return connection.error;
+
+        try{
+            const query = 'select * from owners';
+            const rows = await connection.query(query);
+            console.log(rows)
+            return rows;
+        }catch(error){
+            return error;
+        }finally{
+            await connection.release();
+        }
     }
+
 }
 
 
