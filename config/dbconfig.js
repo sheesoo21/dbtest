@@ -18,7 +18,8 @@ module.exports = {
         user: 'root',
         password: 'vmfhwprxm',
         database: 'heesootest',
-        connectionLimit: 100
+        connectionLimit: 100,
+        dateStrings: 'date'
     },
     /**운영서버 */
     production: {
