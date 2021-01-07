@@ -9,7 +9,10 @@ const connect = async function () {
         return error
     }
 }
-
+/**
+ * 리뷰 테이블에 필요한 기능
+ * 리뷰작성, 리뷰검색, 수정 및 삭제는 필요없을 듯
+ */
 module.exports = {
 
     select: async function (email) {
