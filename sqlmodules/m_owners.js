@@ -54,8 +54,8 @@ module.exports = {
         if (connection.error) return;
 
         try {
-            const query = ' ';
-            const data = await connection.query(query,)
+            const query = "update owners set nickname = ? where ownerid=" + user.custid;
+            const data = await connection.query(query, [user.nickname])
             return data;
         } catch (error) {
             return error;
@@ -65,6 +65,22 @@ module.exports = {
     },
 
     delete: async function (user) {
+        //✨query 작성시 하나의 상점주에 딸린 여러 가게가 있을 경우
+        //✨탈퇴시 연관된 자식노드들도 삭제하기 위해
+        //✨on delete cascade 옵션을 테이블에 꼭 걸어줄 것
         if (!user) return;
+        
+        const connection = await connect();
+        if (connection.error) return;
+
+        try {
+            const query = 'delete from owners where ownerid = ?';
+            const data = await connection.query(query, [user.ownerid]);
+            return data;
+        } catch (error) {
+            return error;
+        } finally {
+            connection.release();
+        }
     }
 }
