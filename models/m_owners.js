@@ -1,4 +1,4 @@
-const dbconn = require('../dbconnpool');
+const dbconn = require('./dbconnpool');
 
 const connect = async function () {
     try {
@@ -18,7 +18,7 @@ module.exports = {
         if (connection.error) return connection.error;
 
         try {
-            const query = 'select * from customers';
+            const query = 'select * from owners';
             const rows = await connection.query(query);
             //console.log(rows0);
             return rows;
@@ -36,7 +36,7 @@ module.exports = {
         if (connection.error) return;
 
         try {
-            const query = 'insert into customers(email, password, tel, nickname) values (?, ?, ?, ?)';
+            const query = 'insert into owners(email, password, tel, nickname) values (?, ?, ?, ?)';
 
             const data = await connection.query(query, [user.email, user.password, user.tel, user.nickname]);
             return data;
@@ -52,44 +52,30 @@ module.exports = {
 
         const connection = await connect();
         if (connection.error) return;
-
         try {
-            const query = "update customers set nickname = ? where custid=" + user.custid;
-            const data = await connection.query(query, [user.nickname])
-            return data;
+            const query = "update owners set password = ?, tel =?, nickname=? where ownerid=" + user.ownerid;
+            const data = await connection.query(query, [user.password,user.tel,user.nickname])
+            return data;        
+        
         } catch (error) {
             return error;
         } finally {
             connection.release();
         }
-
-        /**@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-         * @@@@@@@@@@@@@ RAW DATA INPUT TEST @@@@@@@@@@@@
-         * @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-         */         
-         
-        // update : async function() {
-        //     const connection = await connect();
-        //     if (connection.error) return;
-        // try {
-        //     const query = 'update customers set nickname = "modified" where custid=1';
-        //     const data = await connection.query(query)
-        //     return data;
-        // } catch (error) {
-        //     return error;
-        // } finally {
-        //     connection.release();
     },
-    delete : async function(user){ //회원탈퇴시 고객정보삭제
-        if (!user) return;
 
+    delete: async function (user) {
+        //✨query 작성시 하나의 상점주에 딸린 여러 가게가 있을 경우
+        //✨탈퇴시 연관된 자식노드들도 삭제하기 위해
+        //✨on delete cascade 옵션을 테이블에 꼭 걸어줄 것
+        if (!user) return;
+        
         const connection = await connect();
         if (connection.error) return;
 
         try {
-            const query = 'delete from customers where custid = ?';
-
-            const data = await connection.query(query, [user.custid]);
+            const query = 'delete from owners where ownerid = ?';
+            const data = await connection.query(query, [user.ownerid]);
             return data;
         } catch (error) {
             return error;
@@ -97,5 +83,4 @@ module.exports = {
             connection.release();
         }
     }
-    
 }

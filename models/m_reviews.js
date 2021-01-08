@@ -1,4 +1,4 @@
-const dbconn = require('../dbconnpool');
+const dbconn = require('./dbconnpool');
 
 const connect = async function () {
     try {
@@ -9,7 +9,10 @@ const connect = async function () {
         return error
     }
 }
-
+/**
+ * 리뷰 테이블에 필요한 기능
+ * 리뷰작성, 리뷰검색, 수정 및 삭제는 필요없을 듯
+ */
 module.exports = {
 
     select: async function (email) {
@@ -18,7 +21,7 @@ module.exports = {
         if (connection.error) return connection.error;
 
         try {
-            const query = 'select * from customers';
+            const query = 'select * from reviews';
             const rows = await connection.query(query);
             //console.log(rows0);
             return rows;
@@ -36,9 +39,19 @@ module.exports = {
         if (connection.error) return;
 
         try {
-            const query = 'insert into customers(email, password, tel, nickname) values (?, ?, ?, ?)';
+            const query =
+                'insert into reviews(storeid,writer,title,content,review_img,score,writedate) values (?,?,?,?,?,?,sysdate())';
 
-            const data = await connection.query(query, [user.email, user.password, user.tel, user.nickname]);
+            const data = await connection.query(
+                query,
+                [user.storeid,
+                user.custid,
+                user.title,
+                user.content,
+                user.review_img,
+                user.score
+                ]
+            );
             return data;
         } catch (error) {
             return error;
@@ -47,55 +60,49 @@ module.exports = {
         }
     },
 
-    update: async function (user) {
-        if (!user) return;
+    inserttest: async function () {
 
         const connection = await connect();
         if (connection.error) return;
 
         try {
-            const query = "update customers set nickname = ? where custid=" + user.custid;
-            const data = await connection.query(query, [user.nickname])
+            const query =
+                'insert into reviews values(25,3,3,"리뷰테스트","sysdate테스트","www.naver.com",3,sysdate())';
+
+            const data = await connection.query(query);
             return data;
         } catch (error) {
+            console.log(error);
             return error;
         } finally {
             connection.release();
         }
-
-        /**@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-         * @@@@@@@@@@@@@ RAW DATA INPUT TEST @@@@@@@@@@@@
-         * @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-         */         
-         
-        // update : async function() {
-        //     const connection = await connect();
-        //     if (connection.error) return;
-        // try {
-        //     const query = 'update customers set nickname = "modified" where custid=1';
-        //     const data = await connection.query(query)
-        //     return data;
-        // } catch (error) {
-        //     return error;
-        // } finally {
-        //     connection.release();
     },
-    delete : async function(user){ //회원탈퇴시 고객정보삭제
-        if (!user) return;
 
+    averagescore: async function () {
         const connection = await connect();
         if (connection.error) return;
 
         try {
-            const query = 'delete from customers where custid = ?';
+            const query =
+                'select score, count(score), avg(score)' +
+                'from reviews group by score with rollup;';
 
-            const data = await connection.query(query, [user.custid]);
+            const data = await connection.query(query);
+            //console.log(data);
             return data;
+
         } catch (error) {
+            console.log(error);
             return error;
         } finally {
             connection.release();
         }
     }
-    
 }
+    
+
+
+    // delete: async function (user) {
+    //     if (!user) return;
+    // }
